@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'   #setting a databas
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
-login_manager.login_message_category = 'info'
+login_manager.login_view = 'login'  # this view here is our login route
+login_manager.login_message_category = 'info' # this category is a boostrap class
 
 from flaskblog import routes  
