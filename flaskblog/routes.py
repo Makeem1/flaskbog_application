@@ -1,8 +1,8 @@
 import secrets
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request,abort
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user,login_required
 import os
@@ -10,22 +10,6 @@ import os
 
 
 
-posts = [
-	{
-		'author': 'Moshood Akeem',
-		'title': 'Blog Post 1',
-		'content': 'First post content',
-		'date_posted': 'April 20, 2020'
-
-	}, 
-	{
-		'author': 'Mustapha Moshood',
-		'title': 'Blog Post 2',
-		'content': 'Second post content',
-		'date_posted': 'April 21, 2020'
-
-	}
-]
 
 
 # when double decorators is used on a function, both decorators are still
@@ -33,7 +17,8 @@ posts = [
 @app.route('/home/')
 @app.route('/')
 def home():
-    return render_template('home.html', posts = posts)
+	posts = Post.query.all()
+	return render_template('home.html', posts = posts)
 
 @app.route('/about')
 def about():
@@ -90,7 +75,7 @@ def save_picture(form_picture):
 	return picture_fn
 
 @app.route('/account', methods=['GET', 'POST'])
-@login_required
+@login_required  #This will require the anyone who want to access this page to login in first inorder to access it
 def account():
 	form = UpdateAccountForm()
 	if form.validate_on_submit():
@@ -110,3 +95,40 @@ def account():
 								user_image_file= user_image_file, form=form)
 
 
+@app.route('/new/post', methods=['GET', 'POST'])
+@login_required # This will require the anyone who want to access this page to login in first inorder to access it
+def new_post():
+	form = PostForm()
+	if form.validate_on_submit():
+		post = Post(title=form.title.data, content = form.content.data, author=current_user)
+		db.session.add(post)
+		db.session.commit()
+		flash('Your post has been created!', 'success')
+		return redirect(url_for('home'))
+	return render_template('create_post.html', title ="New Post", 
+								form=form,  legend="New Post")
+
+
+@app.route('/post/<int:post_id>')
+def post(post_id):
+	post = Post.query.get_or_404(post_id)
+	return render_template('post.html', title =post.title, post=post)
+
+
+@app.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
+@login_required 
+def update_post(post_id): 
+	post = Post.query.get_or_404(post_id)
+	if post.author != current_user:
+		abort(404)
+	form = PostForm()
+	if form.validate_on_submit():
+		post.title = form.title.data
+		post.content = form.content.data
+		db.session.commit()
+		flash("Your post has been updates!", 'success')
+	elif request.method == "GET":
+		form.title.data = post.title
+		form.content.data = post.content
+	return render_template('create_post.html', title ="Update Post", 
+							form=form, legend="Update Post" )
