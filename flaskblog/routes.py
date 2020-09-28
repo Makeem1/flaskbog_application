@@ -8,10 +8,6 @@ from flask_login import login_user, current_user, logout_user,login_required
 import os
 
 
-
-
-
-
 # when double decorators is used on a function, both decorators are still
 #pointing to the same function. Either "/" or "/home " still mean the same thing
 @app.route('/home/')
@@ -64,7 +60,7 @@ def logout():
 
 def save_picture(form_picture):
 	random_hex = secrets.token_hex(8)
-	_ , f_ext = os.path.splitext(form_picture.filename)
+	_ , f_ext = os.path.splitext(form_picture.filename) # note the file upload will always have a filename extension
 	picture_fn = random_hex + f_ext
 	profile_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
@@ -127,8 +123,21 @@ def update_post(post_id):
 		post.content = form.content.data
 		db.session.commit()
 		flash("Your post has been updates!", 'success')
+		return redirect(url_for('home'))
 	elif request.method == "GET":
 		form.title.data = post.title
 		form.content.data = post.content
 	return render_template('create_post.html', title ="Update Post", 
-							form=form, legend="Update Post" )
+							form=form, legend="Update Post")
+
+
+@app.route('/post/<int:post_id>/delete', methods=['POST'])
+@login_required 
+def delete_post(post_id): 
+	post = Post.query.get_or_404(post_id)
+	if post.author != current_user:
+		abort(404)
+	db.session.delete(post)
+	db.session.commit()
+	flash('Your post has been deleted!', 'success')
+	return redirect(url_for('home'))
