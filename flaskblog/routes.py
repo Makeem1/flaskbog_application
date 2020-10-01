@@ -4,7 +4,7 @@ from flask import render_template, url_for, flash, redirect, request,abort
 from flaskblog import app, db, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
-from flask_login import login_user, current_user, logout_user,login_required
+from flask_login import login_user, current_user, logout_user, login_required
 import os
 
 
@@ -30,7 +30,7 @@ def register():
 		user = User(username=form.username.data, email = form.email.data, password = hashed_password)
 		db.session.add(user)
 		db.session.commit()
-		flash(f"Account created for {form.username.data}!", "success")
+		flash(f"Your account has been created! You are now able to login", "success")
 		return redirect(url_for("home"))
 	return render_template('register.html', title="Register", form=form)
 
@@ -43,7 +43,7 @@ def login():
 		user = User.query.filter_by(email = form.email.data).first()
 		if user and bcrypt.check_password_hash(user.password, form.password.data):
 			login_user(user, remember = form.remember.data)
-			next_page = request.args.get('next')
+			next_page = request.args.get('next')   # Using request.atgs.get("next") to query if there's next page, will direct us to the page if it exist na d none if it does not
 			if next_page:
 				return redirect(next_page)
 			else:
@@ -97,7 +97,7 @@ def new_post():
 	form = PostForm()
 	if form.validate_on_submit():
 		post = Post(title=form.title.data, content = form.content.data, author=current_user)
-		db.session.add(post)
+		db.session.add(post) 
 		db.session.commit()
 		flash('Your post has been created!', 'success')
 		return redirect(url_for('home'))
@@ -117,7 +117,7 @@ def update_post(post_id):
 	post = Post.query.get_or_404(post_id)
 	if post.author != current_user:
 		abort(404)
-	form = PostForm()
+	form = PostForm()   
 	if form.validate_on_submit():
 		post.title = form.title.data
 		post.content = form.content.data
