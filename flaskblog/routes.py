@@ -10,11 +10,13 @@ import os
 
 # when double decorators is used on a function, both decorators are still
 #pointing to the same function. Either "/" or "/home " still mean the same thing
+
 @app.route('/home/')
 @app.route('/')
 def home():
-	posts = Post.query.all()
-	return render_template('home.html', posts = posts)
+	page = request.args.get('page',1, type = int)
+	all_post = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+	return render_template('home.html', all_post = all_post )
 
 @app.route('/about')
 def about():
@@ -141,3 +143,13 @@ def delete_post(post_id):
 	db.session.commit()
 	flash('Your post has been deleted!', 'success')
 	return redirect(url_for('home'))
+
+
+@app.route('/user/<string:username>')
+def user_posts(username):
+	page = request.args.get('page', 1, type=int)
+	user = User.query.filter_by(username=username).first_or_404()
+	all_post = Post.query.filter_by(author=user)\
+			.order_by(Post.date_posted.desc())\
+			.paginate(page=page, per_page=5)
+	return render_template('user_posts.html', all_post = all_post, user=user)
