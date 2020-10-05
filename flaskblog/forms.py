@@ -5,8 +5,6 @@ from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationE
 from flaskblog.models import User
 from flask_login import current_user
 
-
-
 class RegistrationForm(FlaskForm):
 	'''Creating registration form '''
 	username = StringField('Username', validators = [DataRequired(), Length(min=4, max=25)])
@@ -25,14 +23,12 @@ class RegistrationForm(FlaskForm):
 		if user:
 			raise ValidationError("Email already taken")
 
-
 class LoginForm(FlaskForm):
 	'''Creating Login form '''
 	email = StringField('Email Address', validators = [DataRequired(), Email()])
 	password = PasswordField('Password', validators = [DataRequired()])
 	remember = BooleanField("Remember Me")
 	submit = SubmitField("Login")
-
 
 class UpdateAccountForm(FlaskForm):
 	'''Creating registration form '''
@@ -53,10 +49,28 @@ class UpdateAccountForm(FlaskForm):
 			if user:
 				raise ValidationError("Email already taken")
 
-
 class PostForm(FlaskForm):
 	'''Creating Login form '''
 	title = StringField('Title', validators = [DataRequired()])
 	content = TextAreaField('Content', validators = [DataRequired()])
 	submit = SubmitField("Post")
+
+class RequestResetForm(FlaskForm):
+	'''Creating Login form '''
+	email = StringField('Email Address', validators = [DataRequired(), Email()])
+	submit = SubmitField("Request Password Reset")
+
+	def validate_email(self,email):
+		user = User.query.filter_by(email=email.data).first()
+		if user is None:
+			raise ValidationError("There is no account with this email, You must register first.")
+
+class PasswordResteForm(FlaskForm):
+	'''Creating Login form '''
+	password = PasswordField('Password', validators = [DataRequired(), Length(min=4)])
+	confirm_password = PasswordField("Confirm Password", validators = [DataRequired(), EqualTo("password")])
+	submit = SubmitField("Reset Password")
+
+
+
 
