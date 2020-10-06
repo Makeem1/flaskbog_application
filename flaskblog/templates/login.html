@@ -48,14 +48,14 @@
 			<div class="form-group mt-3">
 				{{ form.submit(class="btn btn-outline-info") }}					<!-- This represent our label in html-->
 				<small class="text-muted">
-				<a href="{{ url_for('reset_request') }}">Forget Password</a>
+				<a href="{{ url_for('users.reset_request') }}">Forget Password</a>
 			</small>
 			</div>
 		</form> 
 	</div>
 	<div class="border-top pt-3">
 			<small>
-				Need an account? <a class=""ml-2 href="{{ url_for('register') }}"> Sign Up Now</a>
+				Need an account? <a class=""ml-2 href="{{ url_for('users.register') }}"> Sign Up Now</a>
 			</small>
 		</div>
 	 

@@ -1,9 +1,11 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import BooleanField, StringField, PasswordField, SubmitField, TextAreaField
+from wtforms import BooleanField, StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
 from flaskblog.models import User
 from flask_login import current_user
+
+
 
 class RegistrationForm(FlaskForm):
 	'''Creating registration form '''
@@ -49,11 +51,6 @@ class UpdateAccountForm(FlaskForm):
 			if user:
 				raise ValidationError("Email already taken")
 
-class PostForm(FlaskForm):
-	'''Creating Login form '''
-	title = StringField('Title', validators = [DataRequired()])
-	content = TextAreaField('Content', validators = [DataRequired()])
-	submit = SubmitField("Post")
 
 class RequestResetForm(FlaskForm):
 	'''Creating Login form '''
@@ -70,7 +67,3 @@ class PasswordResteForm(FlaskForm):
 	password = PasswordField('Password', validators = [DataRequired(), Length(min=4)])
 	confirm_password = PasswordField("Confirm Password", validators = [DataRequired(), EqualTo("password")])
 	submit = SubmitField("Reset Password")
-
-
-
-
